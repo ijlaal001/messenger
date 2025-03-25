@@ -57,6 +57,27 @@
             chatbox.scrollTop = chatbox.scrollHeight;
         }
 
+        document.getElementById("send").addEventListener("click", function() {
+            let messageInput = document.getElementById("message");
+            let messageText = messageInput.value.trim();
+            let chatbox = document.getElementById("chatbox");
+            let currentUser = localStorage.getItem("currentUser");
+
+            if (messageText !== "" && currentUser) {
+                let messageElement = document.createElement("div");
+                messageElement.className = "message user";
+                messageElement.textContent = currentUser + ": " + messageText;
+
+                chatbox.appendChild(messageElement);
+                chatbox.scrollTop = chatbox.scrollHeight;
+
+                let messages = chatbox.innerHTML;
+                localStorage.setItem("messages", messages);
+
+                messageInput.value = "";
+            }
+        });
+
         document.getElementById("registerBtn").addEventListener("click", function() {
             let newUsername = document.getElementById("newUsername").value.trim();
             let newPassword = document.getElementById("newPassword").value.trim();
@@ -92,34 +113,6 @@
                 alert("Invalid username or password");
             }
         });
-
-        document.getElementById("showLogin").addEventListener("click", function() {
-            document.getElementById("register").style.display = "none";
-            document.getElementById("login").style.display = "block";
-        });
-        
-        document.getElementById("showRegister").addEventListener("click", function() {
-            document.getElementById("login").style.display = "none";
-            document.getElementById("register").style.display = "block";
-        });
-
-        document.getElementById("logout").addEventListener("click", function() {
-            localStorage.removeItem("currentUser");
-            localStorage.removeItem("isAdmin");
-            document.getElementById("chat").style.display = "none";
-            document.getElementById("login").style.display = "block";
-        });
-
-        window.onload = function() {
-            if (localStorage.getItem("currentUser")) {
-                document.getElementById("login").style.display = "none";
-                document.getElementById("register").style.display = "none";
-                document.getElementById("chat").style.display = "block";
-                loadMessages();
-            } else {
-                document.getElementById("register").style.display = "block";
-            }
-        };
     </script>
 </body>
 </html>
