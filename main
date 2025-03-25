@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WhatsApp-Like Chat App</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #e5ddd5; }
+        #header { background: #075e54; color: white; padding: 15px; text-align: left; font-size: 20px; display: flex; align-items: center; }
+        #header img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+        #login, #register, #chat { display: none; text-align: center; margin-top: 50px; }
+        input { padding: 10px; margin: 10px; width: 80%; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; border: none; background: #128c7e; color: white; border-radius: 5px; cursor: pointer; }
+        #chatbox { width: 90%; height: 400px; margin: 20px auto; border-radius: 10px; background: white; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
+        .message { padding: 10px; margin: 5px; border-radius: 10px; max-width: 60%; display: inline-block; word-wrap: break-word; }
+        .user { background: #dcf8c6; align-self: flex-end; text-align: right; border-radius: 10px 10px 0 10px; }
+        .other { background: #fff; align-self: flex-start; text-align: left; border-radius: 10px 10px 10px 0; }
+        #messageBox { display: flex; position: fixed; bottom: 0; width: 100%; padding: 10px; background: white; align-items: center; }
+        #message { flex: 1; border: 1px solid #ccc; border-radius: 20px; padding: 10px; }
+        #send { margin-left: 10px; background: #25d366; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <img src="https://www.w3schools.com/w3images/avatar2.png" alt="User">
+        WhatsApp-Like Chat
+    </div>
+    
+    <div id="register">
+        <h3>Register</h3>
+        <input type="text" id="newUsername" placeholder="Choose a username">
+        <input type="password" id="newPassword" placeholder="Choose a password">
+        <button id="registerBtn">Register</button>
+        <p>Already have an account? <a href="#" id="showLogin">Login here</a></p>
+    </div>
+
+    <div id="login">
+        <h3>Login</h3>
+        <input type="text" id="username" placeholder="Enter username">
+        <input type="password" id="password" placeholder="Enter password">
+        <button id="loginBtn">Login</button>
+        <p>Don't have an account? <a href="#" id="showRegister">Register here</a></p>
+    </div>
+
+    <div id="chat">
+        <div id="chatbox"></div>
+        <div id="messageBox">
+            <input type="text" id="message" placeholder="Type your message...">
+            <button id="send">▶</button>
+            <button id="logout">Logout</button>
+            <button id="clearMessages" style="display: none;">Clear Messages</button>
+        </div>
+    </div>
+
+    <script>
+        function loadMessages() {
+            let chatbox = document.getElementById("chatbox");
+            chatbox.innerHTML = localStorage.getItem("messages") || "";
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        document.getElementById("registerBtn").addEventListener("click", function() {
+            let newUsername = document.getElementById("newUsername").value.trim();
+            let newPassword = document.getElementById("newPassword").value.trim();
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+            
+            if (newUsername in users) {
+                alert("Username already exists! Choose another.");
+                return;
+            }
+            
+            users[newUsername] = { password: newPassword, isAdmin: newUsername === "admin" };
+            localStorage.setItem("users", JSON.stringify(users));
+            alert("Registration successful! Please login.");
+        });
+
+        document.getElementById("loginBtn").addEventListener("click", function() {
+            let username = document.getElementById("username").value.trim();
+            let password = document.getElementById("password").value.trim();
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+            
+            if (users[username] && users[username].password === password) {
+                localStorage.setItem("currentUser", username);
+                localStorage.setItem("isAdmin", users[username].isAdmin);
+                document.getElementById("login").style.display = "none";
+                document.getElementById("register").style.display = "none";
+                document.getElementById("chat").style.display = "block";
+                
+                if (users[username].isAdmin) {
+                    document.getElementById("clearMessages").style.display = "block";
+                }
+                loadMessages();
+            } else {
+                alert("Invalid username or password");
+            }
+        });
+
+        document.getElementById("showLogin").addEventListener("click", function() {
+            document.getElementById("register").style.display = "none";
+            document.getElementById("login").style.display = "block";
+        });
+        
+        document.getElementById("showRegister").addEventListener("click", function() {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("register").style.display = "block";
+        });
+
+        document.getElementById("logout").addEventListener("click", function() {
+            localStorage.removeItem("currentUser");
+            localStorage.removeItem("isAdmin");
+            document.getElementById("chat").style.display = "none";
+            document.getElementById("login").style.display = "block";
+        });
+
+        window.onload = function() {
+            if (localStorage.getItem("currentUser")) {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("register").style.display = "none";
+                document.getElementById("chat").style.display = "block";
+                loadMessages();
+            } else {
+                document.getElementById("register").style.display = "block";
+            }
+        };
+    </script>
+</body>
+</html>
