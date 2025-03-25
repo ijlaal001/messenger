@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Messenger</title>
+    <title>WhatsApp-Like Chat App</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #e5ddd5; }
         #header { background: #075e54; color: white; padding: 15px; text-align: left; font-size: 20px; display: flex; align-items: center; }
@@ -47,30 +47,44 @@
             <input type="text" id="message" placeholder="Type your message...">
             <button id="send">✉️</button>
             <button id="logout">Logout</button>
-            <button id="clearMessages" style="display: none;">Clear Messages</button>
         </div>
     </div>
 
     <script>
         const backendURL = "https://messenger-backend-sh73.onrender.com";
 
-        document.getElementById("send").addEventListener("click", function() {
-            let messageInput = document.getElementById("message");
-            let messageText = messageInput.value.trim();
-            let currentUser = localStorage.getItem("currentUser");
+        document.getElementById("registerBtn").addEventListener("click", function() {
+            let username = document.getElementById("newUsername").value.trim();
+            let password = document.getElementById("newPassword").value.trim();
+            
+            fetch(`${backendURL}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            }).then(response => response.json())
+              .then(data => alert(data.message));
+        });
 
-            if (messageText !== "" && currentUser) {
-                fetch(`${backendURL}/send`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ user: currentUser, message: messageText })
-                })
-                .then(response => response.json())
-                .then(() => {
-                    loadMessages();
-                    messageInput.value = "";
-                });
-            }
+        document.getElementById("loginBtn").addEventListener("click", function() {
+            let username = document.getElementById("username").value.trim();
+            let password = document.getElementById("password").value.trim();
+
+            fetch(`${backendURL}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      sessionStorage.setItem("currentUser", username);
+                      document.getElementById("login").style.display = "none";
+                      document.getElementById("register").style.display = "none";
+                      document.getElementById("chat").style.display = "block";
+                      loadMessages();
+                  } else {
+                      alert("Invalid username or password");
+                  }
+              });
         });
 
         function loadMessages() {
@@ -81,7 +95,7 @@
                     chatbox.innerHTML = "";
                     messages.forEach(msg => {
                         let messageElement = document.createElement("div");
-                        messageElement.className = msg.user === localStorage.getItem("currentUser") ? "message user" : "message other";
+                        messageElement.className = msg.user === sessionStorage.getItem("currentUser") ? "message user" : "message other";
                         messageElement.textContent = msg.user + ": " + msg.message;
                         chatbox.appendChild(messageElement);
                     });
@@ -89,36 +103,27 @@
                 });
         }
 
-        document.getElementById("loginBtn").addEventListener("click", function() {
-            let username = document.getElementById("username").value.trim();
-            let password = document.getElementById("password").value.trim();
+        document.getElementById("send").addEventListener("click", function() {
+            let messageInput = document.getElementById("message");
+            let messageText = messageInput.value.trim();
+            let currentUser = sessionStorage.getItem("currentUser");
 
-            fetch(`${backendURL}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    localStorage.setItem("currentUser", username);
-                    document.getElementById("login").style.display = "none";
-                    document.getElementById("register").style.display = "none";
-                    document.getElementById("chat").style.display = "block";
-                    loadMessages();
-                } else {
-                    alert("Invalid username or password");
-                }
-            });
+            if (messageText !== "" && currentUser) {
+                fetch(`${backendURL}/send`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user: currentUser, message: messageText })
+                }).then(response => response.json())
+                  .then(() => {
+                      loadMessages();
+                      messageInput.value = "";
+                  });
+            }
         });
 
-        document.getElementById("showRegister").addEventListener("click", function() {
-            document.getElementById("login").style.display = "none";
-            document.getElementById("register").style.display = "block";
-        });
-
-        document.getElementById("showLogin").addEventListener("click", function() {
-            document.getElementById("register").style.display = "none";
+        document.getElementById("logout").addEventListener("click", function() {
+            sessionStorage.removeItem("currentUser");
+            document.getElementById("chat").style.display = "none";
             document.getElementById("login").style.display = "block";
         });
     </script>
