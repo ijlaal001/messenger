@@ -25,14 +25,6 @@
         ChatVerse
     </div>
     
-    <div id="register">
-        <h3>Register</h3>
-        <input type="text" id="newUsername" placeholder="Choose a username">
-        <input type="password" id="newPassword" placeholder="Choose a password">
-        <button id="registerBtn">Register</button>
-        <p>Already have an account? <a href="#" id="showLogin">Login here</a></p>
-    </div>
-
     <div id="login">
         <h3>Login</h3>
         <input type="text" id="username" placeholder="Enter username">
@@ -41,7 +33,15 @@
         <p>Don't have an account? <a href="#" id="showRegister">Register here</a></p>
     </div>
 
-    <div id="chat">
+    <div id="register" style="display:none;">
+        <h3>Register</h3>
+        <input type="text" id="newUsername" placeholder="Choose a username">
+        <input type="password" id="newPassword" placeholder="Choose a password">
+        <button id="registerBtn">Register</button>
+        <p>Already have an account? <a href="#" id="showLogin">Login here</a></p>
+    </div>
+
+    <div id="chat" style="display:none;">
         <div id="chatbox"></div>
         <div id="messageBox">
             <input type="text" id="message" placeholder="Type your message...">
@@ -53,6 +53,7 @@
     <script>
         const backendURL = "https://messenger-backend-sh73.onrender.com";
 
+        // Register button event
         document.getElementById("registerBtn").addEventListener("click", function() {
             let username = document.getElementById("newUsername").value.trim();
             let password = document.getElementById("newPassword").value.trim();
@@ -65,6 +66,7 @@
               .then(data => alert(data.message));
         });
 
+        // Login button event
         document.getElementById("loginBtn").addEventListener("click", function() {
             let username = document.getElementById("username").value.trim();
             let password = document.getElementById("password").value.trim();
@@ -87,6 +89,19 @@
               });
         });
 
+        // Switch to Register page
+        document.getElementById("showRegister").addEventListener("click", function() {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("register").style.display = "block";
+        });
+
+        // Switch to Login page
+        document.getElementById("showLogin").addEventListener("click", function() {
+            document.getElementById("register").style.display = "none";
+            document.getElementById("login").style.display = "block";
+        });
+
+        // Load chat messages
         function loadMessages() {
             fetch(`${backendURL}/messages`)
                 .then(response => response.json())
@@ -103,6 +118,7 @@
                 });
         }
 
+        // Send a message
         document.getElementById("send").addEventListener("click", function() {
             let messageInput = document.getElementById("message");
             let messageText = messageInput.value.trim();
@@ -121,6 +137,7 @@
             }
         });
 
+        // Logout button event
         document.getElementById("logout").addEventListener("click", function() {
             sessionStorage.removeItem("currentUser");
             document.getElementById("chat").style.display = "none";
